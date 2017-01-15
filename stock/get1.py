@@ -2,6 +2,7 @@ import datetime
 import time
 import csv
 import sys
+import re
 import urllib.request
 import pandas as pd
 import matplotlib.pyplot as plot
@@ -9,27 +10,39 @@ import matplotlib
 import numpy as np
 import locale
 import seaborn as sns
-
-#一旦適当な株のページを参照（あとで複数指定できるようにする）
-URL = 'http://info.finance.yahoo.co.jp/history/?code=6050.T'
-
-response = urllib.request.urlopen(URL)
-
-html = response.read().decode("utf-8")
-
-#beautiful soupでスクレイピング
-#lxmlは超高速らしいので使う
 from bs4 import BeautifulSoup
-soup = BeautifulSoup(html, "lxml")
-article = soup.find(class_="boardFin yjSt marB6")
-h2_list = article.findAll("tr")
-tds = article.findAll("td")
 
+#開くべきURLを指定
+def access_url(code, sy, sm, sd, ey, em, ed):
+    url = 'http://info.finance.yahoo.co.jp/history/?code=%d.T&sy=%d&sm=%d&sd=%d&ey=%d&em=%d&ed=%d&tm=d' % (code, sy, sm, sd, ey, em, ed)
+    return url 
+
+#リストを取るべきページ数の指定
+soup = BeautifulSoup(html, "lxml")
+#article = soup.find(class_="boardFin yjSt marB6")
+item = soup.find('span', 'stocksHistoryPageing yjS').string
+total_items = int(re.findall(r'\d+', item)[2])
+page_num  = int(np.ceil(total_items/20))
+
+#各ページから株価を取ってくる
+def page_research(code, sy, sm, sd, ey, em, ed, p=1):
+    for i in range (1, p):
+        read_url = 'http://info.finance.yahoo.co.jp/history/?code=%d.T&sy=%d&sm=%d&sd=%d&ey=%d&em=%d&ed=%d&tm=d&&p=%d' % (code, sy, sm, sd, ey, em, ed, i)
+        response = urllib.request.urlopen(read_url)
+        html = response.read().decode("utf-8")
+        soup = BeautifulSoup(html, "lxml")
+        item = soup.find(class_="boardFin yjSt marB6")
+        h2_list = item.findAll("tr")
+        tds = item.findAll("td")
+        print (tds)
+
+##以下は要修正
 def get_price(lists, idx =1):
 	elm = lists[idx]
 	tds = elm.findAll("td")
 	data = [td.text for td in tds]
 	return data
+
 get_price(h2_list, 2)
 
 price_sets = []
@@ -58,5 +71,3 @@ data['終値']  = data['終値'].astype(float)
 data['出来高']  = data['出来高'].astype(float)
 data['調整後終値']  = data['調整後終値'].astype(float)
 data.dtypes
-
-data.plot(x = '日付', y = ['終値', '出来高'], figsize=(20,10))
