@@ -17,6 +17,9 @@ def access_url(code, sy, sm, sd, ey, em, ed):
     url = 'http://info.finance.yahoo.co.jp/history/?code=%d.T&sy=%d&sm=%d&sd=%d&ey=%d&em=%d&ed=%d&tm=d' % (code, sy, sm, sd, ey, em, ed)
     return url 
 
+response = urllib.request.urlopen(URL)
+html = response.read().decode("utf-8")
+
 #リストを取るべきページ数の指定
 soup = BeautifulSoup(html, "lxml")
 #article = soup.find(class_="boardFin yjSt marB6")
@@ -33,9 +36,26 @@ def page_research(code, sy, sm, sd, ey, em, ed, p=1):
         soup = BeautifulSoup(html, "lxml")
         item = soup.find(class_="boardFin yjSt marB6")
         h2_list = item.findAll("tr")
-        tds = item.findAll("td")
-        print (tds)
+return h2_list
 
+def get_price(price_list, idx = 1):
+    price_idx = price_list[idx]
+    price_idx = price_idx.findAll("td")
+    price_idx = [price.text for price in price_idx]
+    return price_idx
+
+price_set = []
+def price_set_list(set_list):
+    pr_data = page_research(6050, 2016, 10, 20, 2017, 1, 1)
+    for i in range(1, 20):
+        data = get_price(pr_data, i)
+        price_set.append(data)
+    return price_set
+
+print price_set_list(price_set)
+
+
+/*
 ##以下は要修正
 def get_price(lists, idx =1):
 	elm = lists[idx]
@@ -71,3 +91,4 @@ data['終値']  = data['終値'].astype(float)
 data['出来高']  = data['出来高'].astype(float)
 data['調整後終値']  = data['調整後終値'].astype(float)
 data.dtypes
+*/
