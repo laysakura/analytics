@@ -38,13 +38,14 @@ def page_research(code, sy, sm, sd, ey, em, ed, p=1):
         h2_list = item.findAll("tr")
 return h2_list
 
+#tdを削除して各要素をリストとして作成
 def get_price(price_list, idx = 1):
     price_idx = price_list[idx]
     price_idx = price_idx.findAll("td")
     price_idx = [price.text for price in price_idx]
     return price_idx
 
-price_set = []
+#各リストを要素に持つprice_set_listを作成
 def price_set_list(set_list):
     pr_data = page_research(6050, 2016, 10, 20, 2017, 1, 1)
     for i in range(1, 20):
@@ -52,7 +53,11 @@ def price_set_list(set_list):
         price_set.append(data)
     return price_set
 
-print price_set_list(price_set)
+#指定ページのpirce_listをすべてリストにする
+price_set=[]
+for i in range(1, page_num):
+    pr_data  = page_research(6050, 2016, 10, 20, 2017, 1, 1, i)
+    price_list_all_days = price_set_list(price_set, pr_data)
 
 
 /*
