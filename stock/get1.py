@@ -36,7 +36,7 @@ def page_research(code, sy, sm, sd, ey, em, ed, p=1):
         soup = BeautifulSoup(html, "lxml")
         item = soup.find(class_="boardFin yjSt marB6")
         h2_list = item.findAll("tr")
-return h2_list
+    return h2_list
 
 #tdを削除して各要素をリストとして作成
 def get_price(price_list, idx = 1):
